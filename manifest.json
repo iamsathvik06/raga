@@ -1,0 +1,15 @@
+{
+  "name": "SyncPlay Unified Music",
+  "short_name": "SyncPlay",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIGZpbGw9IiMwOTA5MGIiLz48Y2lyY2xlIGN4PSIyNTYiIGN5PSIyNTYiIHI9IjEyMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmFmYWZhIiBzdHJva2Utd2lkdGg9IjMyIi8+PHBhdGggZD0iTTIyNCAxOTJMMzIwIDI1NkwyMjQgMzIwdnoiIGZpbGw9IiNmYWZhZmEiLz48L3N2Zz4=",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

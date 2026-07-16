@@ -1,0 +1,6 @@
+{
+  "name": "SyncPlay Unified Music",
+  "description": "A cross-platform music player integrating YouTube and AI recommendations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
