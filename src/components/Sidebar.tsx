@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, Search, Library, Heart, PlusSquare, LogOut, User, Upload, ListMusic, MoreVertical, Edit2, Trash2, Check } from 'lucide-react';
+import { Home, Search, Library, Heart, PlusSquare, LogOut, User, Upload, ListMusic, MoreVertical, Edit2, Trash2, Check, X as CloseIcon } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { motion, AnimatePresence } from 'motion/react';
 import { usePlayerStore } from '../store/usePlayerStore';
@@ -21,7 +21,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onUploadClick, onSearchClick, 
 
   const navItems = [
     { icon: Home, label: 'Home', active: !activePlaylistId, onClick: () => { setActivePlaylist(null); onLibraryClick?.(); } },
-    { icon: Search, label: 'Explore', onClick: onSearchClick },
+    { icon: Search, label: 'Search', onClick: onSearchClick },
     { icon: Library, label: 'Library', onClick: onLibraryClick },
   ];
 
@@ -41,103 +41,107 @@ export const Sidebar: React.FC<SidebarProps> = ({ onUploadClick, onSearchClick, 
     }
   };
 
+  const startEditing = (id: string, currentName: string) => {
+    setEditingId(id);
+    setEditName(currentName);
+    setShowMenuId(null);
+  };
+
   return (
-    <div
-      className="w-56 h-full flex flex-col py-4 overflow-y-auto"
-      style={{ background: '#0f0f0f', borderRight: '1px solid #272727', scrollbarWidth: 'none' }}
-    >
-      {/* Nav Items */}
-      <nav className="px-2 mb-4">
-        {navItems.map((item) => (
+    <div className="w-60 h-full flex flex-col bg-surface/40 backdrop-blur-xl border-r border-glass-border py-8 px-4">
+      <div className="flex items-center gap-2.5 px-4 mb-10">
+        <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
+          <span className="font-bold text-white text-lg">R</span>
+        </div>
+        <h1 className="text-xl font-bold tracking-tight text-text-primary">Raga</h1>
+      </div>
+
+      <div className="px-4 mb-6">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-accent/10 border border-accent/20 rounded-lg">
+          <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+          <span className="text-[10px] font-bold text-accent uppercase tracking-widest">Tollywood Theme</span>
+        </div>
+      </div>
+
+      <nav className="space-y-8 flex-1 overflow-y-auto custom-scrollbar">
+        <div className="space-y-1">
+          {navItems.map((item) => (
+            <button
+              key={item.label}
+              onClick={item.onClick}
+              className={`flex items-center gap-3 w-full px-4 py-2 rounded-lg transition-all text-sm font-medium ${
+                item.active ? 'bg-accent/10 text-accent' : 'text-text-secondary hover:text-text-primary hover:bg-glass'
+              }`}
+            >
+              <item.icon size={18} strokeWidth={item.active ? 2.5 : 2} />
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="space-y-1">
+          <p className="px-4 text-[10px] font-bold text-text-secondary/40 uppercase tracking-widest mb-3">Library</p>
+          
           <button
-            key={item.label}
-            onClick={item.onClick}
-            className="flex items-center gap-4 w-full px-3 py-2.5 rounded-lg transition-colors text-sm"
-            style={{
-              color: item.active ? '#fff' : '#aaaaaa',
-              background: item.active ? '#272727' : 'transparent',
-              fontWeight: item.active ? 600 : 400,
-            }}
+            onClick={() => setActivePlaylist('liked')}
+            className={`flex items-center gap-3 w-full px-4 py-2 rounded-lg transition-all text-sm font-medium ${
+              activePlaylistId === 'liked' ? 'bg-accent/10 text-accent' : 'text-text-secondary hover:text-text-primary hover:bg-glass'
+            }`}
           >
-            <item.icon size={20} strokeWidth={item.active ? 2.5 : 1.5} />
-            <span>{item.label}</span>
+            <Heart size={18} fill={activePlaylistId === 'liked' ? 'currentColor' : 'none'} strokeWidth={activePlaylistId === 'liked' ? 2.5 : 2} />
+            <span>Liked Songs</span>
           </button>
-        ))}
-      </nav>
 
-      {/* Divider */}
-      <div className="mx-3 mb-4" style={{ borderTop: '1px solid #272727' }} />
+          {isCreating ? (
+            <form onSubmit={handleCreatePlaylist} className="px-4 py-2">
+              <input
+                autoFocus
+                type="text"
+                value={newPlaylistName}
+                onChange={(e) => setNewPlaylistName(e.target.value)}
+                onBlur={() => !newPlaylistName && setIsCreating(false)}
+                placeholder="Playlist name..."
+                className="w-full bg-glass border border-glass-border rounded px-2 py-1 text-xs outline-none focus:border-accent transition-colors"
+              />
+            </form>
+          ) : (
+            <button
+              onClick={() => setIsCreating(true)}
+              className="flex items-center gap-3 w-full px-4 py-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-glass transition-all text-sm font-medium"
+            >
+              <PlusSquare size={18} />
+              <span>Create Playlist</span>
+            </button>
+          )}
+          
+          {user && (
+            <button
+              onClick={onUploadClick}
+              className="flex items-center gap-3 w-full px-4 py-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-glass transition-all text-sm font-medium"
+            >
+              <Upload size={18} />
+              <span>Upload Song</span>
+            </button>
+          )}
+        </div>
 
-      {/* Library Section */}
-      <div className="px-2 flex-1">
-        <p className="px-3 text-xs font-bold uppercase tracking-wider mb-3" style={{ color: '#606060' }}>Library</p>
-
-        <button
-          onClick={() => setActivePlaylist('liked')}
-          className="flex items-center gap-4 w-full px-3 py-2.5 rounded-lg transition-colors text-sm"
-          style={{
-            color: activePlaylistId === 'liked' ? '#fff' : '#aaaaaa',
-            background: activePlaylistId === 'liked' ? '#272727' : 'transparent',
-            fontWeight: activePlaylistId === 'liked' ? 600 : 400,
-          }}
-        >
-          <Heart size={20} strokeWidth={1.5} fill={activePlaylistId === 'liked' ? '#ff0000' : 'none'} style={{ color: activePlaylistId === 'liked' ? '#ff0000' : '#aaaaaa' }} />
-          <span>Liked Songs</span>
-        </button>
-
-        {isCreating ? (
-          <form onSubmit={handleCreatePlaylist} className="px-3 py-1.5">
-            <input
-              autoFocus
-              type="text"
-              value={newPlaylistName}
-              onChange={(e) => setNewPlaylistName(e.target.value)}
-              onBlur={() => !newPlaylistName && setIsCreating(false)}
-              placeholder="Playlist name..."
-              className="w-full rounded px-2 py-1 text-xs outline-none"
-              style={{ background: '#272727', color: '#fff', border: '1px solid #404040' }}
-            />
-          </form>
-        ) : (
-          <button
-            onClick={() => setIsCreating(true)}
-            className="flex items-center gap-4 w-full px-3 py-2.5 rounded-lg transition-colors text-sm"
-            style={{ color: '#aaaaaa' }}
-          >
-            <PlusSquare size={20} strokeWidth={1.5} />
-            <span>New Playlist</span>
-          </button>
-        )}
-
-        {user && (
-          <button
-            onClick={onUploadClick}
-            className="flex items-center gap-4 w-full px-3 py-2.5 rounded-lg transition-colors text-sm"
-            style={{ color: '#aaaaaa' }}
-          >
-            <Upload size={20} strokeWidth={1.5} />
-            <span>Upload Song</span>
-          </button>
-        )}
-
-        {/* Playlists */}
         {playlists.length > 0 && (
-          <div className="mt-4">
-            <p className="px-3 text-xs font-bold uppercase tracking-wider mb-2" style={{ color: '#606060' }}>Playlists</p>
+          <div className="space-y-1">
+            <p className="px-4 text-[10px] font-bold text-text-secondary/40 uppercase tracking-widest mb-3">Playlists</p>
             {playlists.map((playlist) => (
               <div key={playlist.id} className="relative group">
                 {editingId === playlist.id ? (
-                  <div className="px-3 py-1">
-                    <div className="flex items-center gap-1 rounded px-2 py-1" style={{ background: '#272727', border: '1px solid #404040' }}>
+                  <div className="px-4 py-1">
+                    <div className="flex items-center gap-1 bg-glass border border-glass-border rounded px-2 py-1">
                       <input
                         autoFocus
                         type="text"
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleRename(playlist.id)}
-                        className="w-full bg-transparent text-xs outline-none text-white"
+                        className="w-full bg-transparent text-xs outline-none"
                       />
-                      <button onClick={() => handleRename(playlist.id)} style={{ color: '#ff0000' }}>
+                      <button onClick={() => handleRename(playlist.id)} className="text-accent hover:text-accent/80">
                         <Check size={14} />
                       </button>
                     </div>
@@ -146,49 +150,46 @@ export const Sidebar: React.FC<SidebarProps> = ({ onUploadClick, onSearchClick, 
                   <div className="flex items-center">
                     <button
                       onClick={() => setActivePlaylist(playlist.id)}
-                      className="flex items-center gap-4 flex-1 px-3 py-2.5 rounded-lg transition-colors text-sm text-left min-w-0"
-                      style={{
-                        color: activePlaylistId === playlist.id ? '#fff' : '#aaaaaa',
-                        background: activePlaylistId === playlist.id ? '#272727' : 'transparent',
-                        fontWeight: activePlaylistId === playlist.id ? 600 : 400,
-                      }}
+                      className={`flex items-center gap-3 flex-1 px-4 py-2 rounded-lg transition-all text-sm font-medium text-left min-w-0 ${
+                        activePlaylistId === playlist.id ? 'bg-accent/10 text-accent' : 'text-text-secondary hover:text-text-primary hover:bg-glass'
+                      }`}
                     >
-                      <ListMusic size={20} strokeWidth={1.5} className="flex-shrink-0" />
+                      <ListMusic size={18} strokeWidth={activePlaylistId === playlist.id ? 2.5 : 2} className="flex-shrink-0" />
                       <span className="truncate">{playlist.name}</span>
                     </button>
-                    <div className="absolute right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
+                    
+                    <div className="absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button 
                         onClick={(e) => { e.stopPropagation(); setShowMenuId(showMenuId === playlist.id ? null : playlist.id); }}
-                        className="p-1.5 rounded transition-colors"
-                        style={{ color: '#aaaaaa' }}
+                        className="p-1.5 text-text-secondary/40 hover:text-text-primary"
                       >
                         <MoreVertical size={14} />
                       </button>
                     </div>
+
                     <AnimatePresence>
                       {showMenuId === playlist.id && (
                         <>
                           <div className="fixed inset-0 z-40" onClick={() => setShowMenuId(null)} />
                           <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="absolute left-full ml-2 top-0 w-36 rounded-xl py-1.5 z-50 shadow-2xl"
-                            style={{ background: '#212121', border: '1px solid #303030' }}
+                            initial={{ opacity: 0, scale: 0.95, x: 10 }}
+                            animate={{ opacity: 1, scale: 1, x: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, x: 10 }}
+                            className="absolute left-full ml-2 top-0 w-32 bg-surface border border-glass-border rounded-lg py-1 z-50 shadow-2xl"
                           >
                             <button
-                              onClick={() => { setEditingId(playlist.id); setEditName(playlist.name); setShowMenuId(null); }}
-                              className="w-full text-left px-4 py-2 text-xs flex items-center gap-2 transition-colors hover:bg-white/5"
-                              style={{ color: '#ccc' }}
+                              onClick={() => startEditing(playlist.id, playlist.name)}
+                              className="w-full text-left px-3 py-1.5 text-[11px] text-text-secondary hover:text-text-primary hover:bg-glass flex items-center gap-2"
                             >
-                              <Edit2 size={12} /> Rename
+                              <Edit2 size={12} />
+                              Rename
                             </button>
                             <button
                               onClick={() => { deletePlaylist(playlist.id); setShowMenuId(null); }}
-                              className="w-full text-left px-4 py-2 text-xs flex items-center gap-2 transition-colors hover:bg-white/5"
-                              style={{ color: '#ff4444' }}
+                              className="w-full text-left px-3 py-1.5 text-[11px] text-red-400/60 hover:text-red-400 hover:bg-glass flex items-center gap-2"
                             >
-                              <Trash2 size={12} /> Delete
+                              <Trash2 size={12} />
+                              Delete
                             </button>
                           </motion.div>
                         </>
@@ -200,30 +201,29 @@ export const Sidebar: React.FC<SidebarProps> = ({ onUploadClick, onSearchClick, 
             ))}
           </div>
         )}
-      </div>
+      </nav>
 
-      {/* User */}
-      <div className="mt-auto px-3 pt-4" style={{ borderTop: '1px solid #272727' }}>
+      <div className="mt-auto pt-6 border-t border-glass-border">
         {user ? (
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <img src={user.photoURL} alt={user.displayName} className="w-7 h-7 rounded-full" />
-              <div>
-                <p className="text-xs font-semibold truncate w-24 text-white">{user.displayName}</p>
-                <p className="text-xs" style={{ color: '#606060' }}>Member</p>
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center gap-3">
+              <img src={user.photoURL} alt={user.displayName} className="w-8 h-8 rounded-full bg-accent/10" />
+              <div className="flex flex-col">
+                <span className="text-xs font-semibold truncate w-24">{user.displayName}</span>
+                <span className="text-[10px] text-text-secondary/40">Pro Member</span>
               </div>
             </div>
-            <button onClick={logout} className="p-1.5 transition-colors" style={{ color: '#606060' }}>
-              <LogOut size={15} />
+            <button onClick={logout} className="p-2 text-text-secondary/40 hover:text-text-primary transition-colors">
+              <LogOut size={16} />
             </button>
           </div>
         ) : (
           <button
             onClick={login}
-            className="flex items-center gap-2.5 w-full p-2.5 rounded-lg text-sm font-bold justify-center transition-opacity hover:opacity-90"
-            style={{ background: '#ff0000', color: '#fff' }}
+            className="flex items-center gap-3 w-full p-2.5 rounded-xl bg-accent text-white hover:opacity-90 transition-all text-sm font-bold justify-center"
           >
-            <User size={16} /> Sign In
+            <User size={18} />
+            <span>Sign In</span>
           </button>
         )}
       </div>
